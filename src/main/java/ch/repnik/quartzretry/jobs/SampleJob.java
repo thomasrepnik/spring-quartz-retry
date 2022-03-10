@@ -1,6 +1,6 @@
 package ch.repnik.quartzretry.jobs;
 
-import ch.repnik.quartzretry.SampleService;
+import ch.repnik.quartzretry.service.SampleService;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;

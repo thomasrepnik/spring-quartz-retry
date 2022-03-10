@@ -1,5 +1,6 @@
-package ch.repnik.quartzretry;
+package ch.repnik.quartzretry.service;
 
+import ch.repnik.quartzretry.retry.AbstractRetrier;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -9,7 +10,6 @@ public class Caller extends AbstractRetrier<Entity, String> {
 
     @Override
     protected String call(Entity entity) {
-
         System.out.println(entity.getName() + " wird an rimex gesendet (Aktueller State: " + entity.getState() +")");
 
         if (entity.getRetryCount() <= 2) {

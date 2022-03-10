@@ -1,6 +1,6 @@
 package ch.repnik.quartzretry.controller;
 
-import ch.repnik.quartzretry.SampleService;
+import ch.repnik.quartzretry.service.SampleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,4 +1,4 @@
-package ch.repnik.quartzretry;
+package ch.repnik.quartzretry.retry;
 
 import lombok.SneakyThrows;
 import org.quartz.*;

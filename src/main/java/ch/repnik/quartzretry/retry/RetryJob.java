@@ -1,20 +1,17 @@
-package ch.repnik.quartzretry;
+package ch.repnik.quartzretry.retry;
 
+import ch.repnik.quartzretry.retry.AbstractRetrier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.quartz.*;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ConfigurableObjectInputStream;
 import org.springframework.stereotype.Component;
-import org.springframework.util.SerializationUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 
 @Component
