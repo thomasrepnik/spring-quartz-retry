@@ -10,7 +10,7 @@ public class Caller extends AbstractRetrier<Entity, String> {
     @Override
     protected String call(Entity entity) {
 
-        System.out.println(entity.getName() + " wird an rimex gesendet");
+        System.out.println(entity.getName() + " wird an rimex gesendet (Aktueller State: " + entity.getState() +")");
 
         if (entity.getRetryCount() <= 2) {
             throw new IllegalArgumentException("Service Call war nicht erfolgreich");

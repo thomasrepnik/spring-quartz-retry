@@ -8,7 +8,7 @@ public class Entity implements Serializable {
     private String name = UUID.randomUUID().toString();
     private int retryCount = 0;
     private String result;
-    private RetryState state;
+    private RetryState state = RetryState.NEW;
 
     public String getResult() {
         return result;
