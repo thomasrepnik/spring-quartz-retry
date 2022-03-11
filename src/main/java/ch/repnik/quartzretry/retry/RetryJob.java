@@ -28,6 +28,7 @@ public class RetryJob implements Job {
 
         JobDataMap map = jobExecutionContext.getMergedJobDataMap();
         String className = map.get("classname").toString();
+        int retryCount = (int) map.get("retryCount");
         byte[] payload = (byte[])map.get("payload");
 
         Serializable deserialized = (Serializable) deserialize(payload);
@@ -36,6 +37,7 @@ public class RetryJob implements Job {
             Class<?> retryImpl = Class.forName(className);
             AbstractRetrier bean = (AbstractRetrier) ctx.getBean(retryImpl);
             //System.out.println("Retry wird duchgeführt: "  + className);
+            bean.setRetryCount(++retryCount);
             bean.start(deserialized);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
