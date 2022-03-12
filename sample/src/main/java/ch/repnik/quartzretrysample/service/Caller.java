@@ -1,15 +1,12 @@
-package ch.repnik.quartzretry.service;
+package ch.repnik.quartzretrysample.service;
 
-import ch.repnik.quartzretry.retry.AbstractRetrier;
-import ch.repnik.quartzretry.retry.RetryInterval;
-import org.quartz.DateBuilder;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
+import ch.repnik.quartzretry.AbstractRetrier;
+import ch.repnik.quartzretry.RetryInterval;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Random;
 
-import static ch.repnik.quartzretry.retry.RetryInterval.retry;
+import static ch.repnik.quartzretry.RetryInterval.retry;
 import static org.quartz.DateBuilder.IntervalUnit.*;
 
 @Component
@@ -19,13 +16,13 @@ public class Caller extends AbstractRetrier<Entity, String> {
     protected String call(Entity entity) {
         System.out.println(new Date() + ": " + entity.getName() + " wird an rimex gesendet (Aktueller State: " + entity.getState() +")");
 
-        /*if (entity.getRetryCount() <= 2) {
-            throw new IllegalArgumentException("Service Call war nicht erfolgreich");
-        }*/
-
-        if (new Random().nextBoolean()){
+        if (entity.getRetryCount() <= 2) {
             throw new IllegalArgumentException("Service Call war nicht erfolgreich");
         }
+
+        /*if (new Random().nextBoolean()){
+            throw new IllegalArgumentException("Service Call war nicht erfolgreich");
+        }*/
 
 
         return " Rimex Upload erfolgreich am " + new Date();

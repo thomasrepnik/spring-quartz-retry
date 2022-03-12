@@ -1,4 +1,4 @@
-package ch.repnik.quartzretry.service;
+package ch.repnik.quartzretrysample.service;
 
 public enum RetryState {
     NEW,

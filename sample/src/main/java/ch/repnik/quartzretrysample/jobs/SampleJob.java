@@ -1,16 +1,16 @@
-package ch.repnik.quartzretry.jobs;
+package ch.repnik.quartzretrysample.jobs;
 
-import ch.repnik.quartzretry.service.SampleService;
-import lombok.extern.slf4j.Slf4j;
+import ch.repnik.quartzretrysample.service.SampleService;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j
 @DisallowConcurrentExecution
+@ComponentScan("ch.repnik.quartzretry")
 public class SampleJob implements Job {
 
     @Autowired private SampleService sampleService;

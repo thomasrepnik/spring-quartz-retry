@@ -1,6 +1,5 @@
-package ch.repnik.quartzretry.jobs;
+package ch.repnik.quartzretrysample.jobs;
 
-import lombok.extern.slf4j.Slf4j;
 import org.quartz.Trigger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-@Slf4j
 @Configuration
 public class QuartzConfiguration {
 
@@ -55,12 +53,10 @@ public class QuartzConfiguration {
 
     private Trigger[] filterTriggers(final Environment env, final Trigger[] triggers) {
         if (triggers == null || triggers.length == 0) {
-            log.trace("No Triggers available");
             return new Trigger[0];
         }
 
         if (env.getProperty(DISABLE_ALL_CRONJOBS_KEY, Boolean.class, false)) {
-            log.info("All CronJob Triggers disabled with property '{}'", DISABLE_ALL_CRONJOBS_KEY);
             return new Trigger[0];
         } else {
             return triggers;

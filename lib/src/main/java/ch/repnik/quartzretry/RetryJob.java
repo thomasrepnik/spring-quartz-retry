@@ -1,8 +1,5 @@
-package ch.repnik.quartzretry.retry;
+package ch.repnik.quartzretry;
 
-import ch.repnik.quartzretry.retry.AbstractRetrier;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -10,18 +7,19 @@ import org.springframework.core.ConfigurableObjectInputStream;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.Serializable;
 
 
 @Component
-@Slf4j
 @DisallowConcurrentExecution
 public class RetryJob implements Job {
 
-    @Autowired
     private ApplicationContext ctx;
 
+    @Autowired
+    public RetryJob(ApplicationContext ctx){
+        this.ctx = ctx;
+    }
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -36,14 +34,11 @@ public class RetryJob implements Job {
         try {
             Class<?> retryImpl = Class.forName(className);
             AbstractRetrier bean = (AbstractRetrier) ctx.getBean(retryImpl);
-            //System.out.println("Retry wird duchgeführt: "  + className);
             bean.setRetryCount(++retryCount);
             bean.start(deserialized);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            throw new QuartzRetryException("Could not create bean " + className, e);
         }
-
-
 
     }
 
@@ -54,22 +49,18 @@ public class RetryJob implements Job {
      * @return
      */
     protected Object deserialize(final byte[] in) {
+        if (in == null){
+            return null;
+        }
+
         Object o = null;
-        ByteArrayInputStream bis = null;
-        ConfigurableObjectInputStream is = null;
-        try {
-            if (in != null) {
-                bis = new ByteArrayInputStream(in);
-                is = new ConfigurableObjectInputStream(bis, Thread.currentThread().getContextClassLoader());
-                o = is.readObject();
-                is.close();
-                bis.close();
-            }
-        } catch (IOException e) {
-        } catch (ClassNotFoundException e) {
-        } finally {
-            IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(bis);
+        try (
+            ByteArrayInputStream bis = new ByteArrayInputStream(in);
+            ConfigurableObjectInputStream is = new ConfigurableObjectInputStream(bis, Thread.currentThread().getContextClassLoader());
+        ) {
+            o = is.readObject();
+        } catch (Exception e) {
+            throw new QuartzRetryException("Could not deserialize object from quartz jobDataMap");
         }
         return o;
     }

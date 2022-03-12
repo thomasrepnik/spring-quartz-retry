@@ -1,6 +1,6 @@
-package ch.repnik.quartzretry.retry;
+package ch.repnik.quartzretry;
 
-import lombok.SneakyThrows;
+
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.SerializationUtils;
@@ -84,7 +84,6 @@ public abstract class AbstractRetrier<T extends Serializable, S> {
 
     }
 
-    @SneakyThrows
     private void persistNewTrigger(T t, Exception e) {
 
         if (this.retryCount > getRetryInterval().length - 1){
@@ -93,9 +92,12 @@ public abstract class AbstractRetrier<T extends Serializable, S> {
             return;
         }
 
-        Trigger trigger = trigger("QuartzJob", t);
-        this.scheduler.addJob(job(), true);
-        this.scheduler.scheduleJob(trigger);
+        try{
+            this.scheduler.addJob(job(), true);
+            this.scheduler.scheduleJob(trigger("QuartzJob", t));
+        } catch (SchedulerException ex) {
+            throw new QuartzRetryException("Error while scheduling new quartz trigger for retry", e);
+        }
     }
 
 }

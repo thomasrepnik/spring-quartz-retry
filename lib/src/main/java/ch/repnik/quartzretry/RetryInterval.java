@@ -1,4 +1,4 @@
-package ch.repnik.quartzretry.retry;
+package ch.repnik.quartzretry;
 
 import org.quartz.DateBuilder;
 

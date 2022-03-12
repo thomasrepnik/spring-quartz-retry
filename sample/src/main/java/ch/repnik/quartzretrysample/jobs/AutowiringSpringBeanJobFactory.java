@@ -1,4 +1,4 @@
-package ch.repnik.quartzretry.jobs;
+package ch.repnik.quartzretrysample.jobs;
 
 import org.quartz.Job;
 import org.quartz.SchedulerContext;

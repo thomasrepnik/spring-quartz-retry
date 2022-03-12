@@ -1,6 +1,4 @@
-package ch.repnik.quartzretry.service;
-
-import ch.repnik.quartzretry.service.RetryState;
+package ch.repnik.quartzretrysample.service;
 
 import java.io.Serializable;
 import java.util.UUID;
