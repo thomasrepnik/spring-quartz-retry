@@ -99,8 +99,5 @@ public class QuartzConfiguration {
         return jobFactory;
     }
 
-    @Bean
-    public Clock clock() {
-        return Clock.systemDefaultZone();
-    }
+
 }

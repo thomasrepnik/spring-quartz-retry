@@ -1,6 +1,7 @@
 package ch.repnik.quartzretrysample.service;
 
 import ch.repnik.quartzretry.AbstractRetrier;
+import ch.repnik.quartzretry.RetryContext;
 import ch.repnik.quartzretry.RetryInterval;
 import org.springframework.stereotype.Component;
 
@@ -10,22 +11,29 @@ import static ch.repnik.quartzretry.RetryInterval.retry;
 import static org.quartz.DateBuilder.IntervalUnit.*;
 
 @Component
-public class Caller extends AbstractRetrier<Entity, String> {
+public class Caller extends AbstractRetrier<Payload, String> {
 
     @Override
-    protected String call(Entity entity) {
-        System.out.println(new Date() + ": " + entity.getName() + " wird an rimex gesendet (Aktueller State: " + entity.getState() +")");
+    protected String call(Payload payload, RetryContext ctx) {
+        System.out.println(new Date() + ": " +
+                payload.getName() +
+                " sending payload to remote server (Current State: " +
+                payload.getState() +" " +
+                ctx.getRetryCount() +
+                ") " +
+                "Context: " + ctx.getDataMap());
 
-        if (entity.getRetryCount() <= 2) {
-            throw new IllegalArgumentException("Service Call war nicht erfolgreich");
+        switch(ctx.getRetryCount()){
+            case 0:
+                ctx.getDataMap().put("name", "Tim");
+                throw new IllegalArgumentException("Remote call failed");
+            case 1:
+                ctx.getDataMap().put("city", "Paris");
+                throw new IllegalArgumentException("Remote call failed");
         }
 
-        /*if (new Random().nextBoolean()){
-            throw new IllegalArgumentException("Service Call war nicht erfolgreich");
-        }*/
-
-
-        return " Rimex Upload erfolgreich am " + new Date();
+        ctx.getDataMap().put("name", "Tom");
+        return "Remote call successful exectued " + new Date() + " Context: " + ctx.getDataMap();
     }
 
     @Override
@@ -38,21 +46,19 @@ public class Caller extends AbstractRetrier<Entity, String> {
     }
 
     @Override
-    protected void onError(Entity entity, Exception e) {
-        System.out.println(new Date() + ": " + entity.getName() + " Fehler Nr" + entity.getRetryCount());
-        entity.setRetryCount(entity.getRetryCount()+1);
+    protected void onError(Payload entity, Exception e, RetryContext ctx) {
         entity.setState(RetryState.RETRY);
     }
 
     @Override
-    protected void onSuccess(Entity entity, String s) {
+    protected void onSuccess(Payload entity, String s, RetryContext ctx) {
         entity.setState(RetryState.SUCCESS);
-        System.out.println(new Date() + ": " + entity.getName() + " Erfolgreich: " + s);
+        System.out.println(new Date() + ": " + entity.getName() + " SUCCESS: " + s);
     }
 
     @Override
-    protected void onFailure(Entity entity, Exception e) {
-        System.out.println("Alle Retries Fehlgeschlagen.");
+    protected void onFailure(Payload payload, Exception e, RetryContext ctx) {
+        System.out.println("All retries failed!");
         e.printStackTrace();
     }
 

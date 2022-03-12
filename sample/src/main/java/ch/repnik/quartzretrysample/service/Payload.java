@@ -3,10 +3,9 @@ package ch.repnik.quartzretrysample.service;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class Entity implements Serializable {
+public class Payload implements Serializable {
 
     private String name = UUID.randomUUID().toString();
-    private int retryCount = 0;
     private String result;
     private RetryState state = RetryState.NEW;
 
@@ -17,16 +16,6 @@ public class Entity implements Serializable {
     public void setResult(String result) {
         this.result = result;
     }
-
-
-    public int getRetryCount() {
-        return retryCount;
-    }
-
-    public void setRetryCount(int retryCount) {
-        this.retryCount = retryCount;
-    }
-
 
     public RetryState getState() {
         return state;

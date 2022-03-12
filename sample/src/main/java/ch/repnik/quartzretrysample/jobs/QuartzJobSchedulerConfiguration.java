@@ -35,15 +35,15 @@ public class QuartzJobSchedulerConfiguration {
         return factoryBean;
     }
 
-    @Bean(name = "schadenmeldungProcessorJobDetail")
+    @Bean(name = "processorJobDetail")
     public JobDetailFactoryBean cpuJobDetail() {
-        return createJobDetail(SampleJob.class, "SchadenmeldungProcessor job");
+        return createJobDetail(SampleJob.class, "Processor job");
     }
 
-    @Bean(name = "schadenmeldungProcessorJobTrigger")
+    @Bean(name = "processorJobTrigger")
     public CronTriggerFactoryBean triggerCpuJob(
-            @Qualifier("schadenmeldungProcessorJobDetail") JobDetail jobDetail) {
+            @Qualifier("processorJobDetail") JobDetail jobDetail) {
         return createCronTrigger(
-                jobDetail, schadenmeldungProcessorCron, "SchadenmeldungProcessor job trigger");
+                jobDetail, schadenmeldungProcessorCron, "processor job trigger");
     }
 }

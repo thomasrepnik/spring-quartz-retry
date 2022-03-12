@@ -11,7 +11,7 @@ public class SampleService {
 
 
     public void process() {
-        Entity entity = new Entity();
+        Payload entity = new Payload();
         caller.start(entity);
     }
 

@@ -1,4 +1,4 @@
-package ch.repnik.quartzretrysample.controller;
+package ch.repnik.quartzretrysample.jobs.controller;
 
 import ch.repnik.quartzretrysample.service.SampleService;
 import org.springframework.beans.factory.annotation.Autowired;

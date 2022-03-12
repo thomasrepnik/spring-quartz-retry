@@ -28,14 +28,16 @@ public class RetryJob implements Job {
         String className = map.get("classname").toString();
         int retryCount = (int) map.get("retryCount");
         byte[] payload = (byte[])map.get("payload");
+        byte[] serializedRetryContext = (byte[]) map.get("retryContext");
 
         Serializable deserialized = (Serializable) deserialize(payload);
+        RetryContext retryContext = (RetryContext) deserialize(serializedRetryContext);
 
         try {
             Class<?> retryImpl = Class.forName(className);
             AbstractRetrier bean = (AbstractRetrier) ctx.getBean(retryImpl);
             bean.setRetryCount(++retryCount);
-            bean.start(deserialized);
+            bean.start(deserialized, retryContext);
         } catch (ClassNotFoundException e) {
             throw new QuartzRetryException("Could not create bean " + className, e);
         }
