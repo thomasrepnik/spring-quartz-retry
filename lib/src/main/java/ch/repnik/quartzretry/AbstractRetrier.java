@@ -16,7 +16,7 @@ public abstract class AbstractRetrier<T extends Serializable, S> {
     private Scheduler scheduler;
     private int retryCount = 0;
 
-    protected abstract S call(T t, RetryContext ctx);
+    protected abstract S process(T t, RetryContext ctx);
 
     protected abstract RetryInterval[] getRetryInterval();
 
@@ -39,28 +39,34 @@ public abstract class AbstractRetrier<T extends Serializable, S> {
         this.retryCount = 0;
     }
 
-    public void start(T t){
-        start(t, new RetryContext());
+    public void startAttempt(T t){
+        startAttempt(t, new RetryContext());
     }
 
-    public void start(T t, RetryContext ctx){
+    public void startAttempt(T t, RetryContext ctx){
 
         ctx.setRetryCount(this.retryCount);
 
         try{
-            S s = call(t, ctx);
+            S s = process(t, ctx);
             onSuccess(t, s, ctx);
             resetRetryCount();
         } catch (Exception e) {
-            try {
-                onError(t, e, ctx);
-            }finally{
-                persistNewTrigger(t, e, ctx);
+
+            if (this.retryCount > getRetryInterval().length - 1){
+                onFailure(t, e, ctx);
+                resetRetryCount();
+            } else {
+                try {
+                    onError(t, e, ctx);
+                }finally{
+                    persistNewTrigger(t, e, ctx);
+                }
             }
+
         }
 
     }
-
 
     private JobDetail job() {
         return JobBuilder.newJob(RetryJob.class)
@@ -68,6 +74,7 @@ public abstract class AbstractRetrier<T extends Serializable, S> {
                 .storeDurably()
                 .build();
     }
+
 
     private Trigger trigger(String triggerName, T t, RetryContext ctx) {
 
@@ -93,12 +100,6 @@ public abstract class AbstractRetrier<T extends Serializable, S> {
     }
 
     private void persistNewTrigger(T t, Exception e, RetryContext ctx) {
-
-        if (this.retryCount > getRetryInterval().length - 1){
-            onFailure(t, e, ctx);
-            resetRetryCount();
-            return;
-        }
 
         try{
             this.scheduler.addJob(job(), true);

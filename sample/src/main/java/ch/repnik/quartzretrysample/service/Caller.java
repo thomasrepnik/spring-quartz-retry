@@ -14,7 +14,7 @@ import static org.quartz.DateBuilder.IntervalUnit.*;
 public class Caller extends AbstractRetrier<Payload, String> {
 
     @Override
-    protected String call(Payload payload, RetryContext ctx) {
+    protected String process(Payload payload, RetryContext ctx) {
         System.out.println(new Date() + ": " +
                 payload.getName() +
                 " sending payload to remote server (Current State: " +
@@ -30,9 +30,11 @@ public class Caller extends AbstractRetrier<Payload, String> {
             case 1:
                 ctx.getDataMap().put("city", "Paris");
                 throw new IllegalArgumentException("Remote call failed");
+            case 2:
+                ctx.getDataMap().remove("city");
+                throw new IllegalArgumentException("Remote call failed");
         }
 
-        ctx.getDataMap().put("name", "Tom");
         return "Remote call successful exectued " + new Date() + " Context: " + ctx.getDataMap();
     }
 

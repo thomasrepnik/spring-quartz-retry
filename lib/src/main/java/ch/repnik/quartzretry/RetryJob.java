@@ -37,7 +37,7 @@ public class RetryJob implements Job {
             Class<?> retryImpl = Class.forName(className);
             AbstractRetrier bean = (AbstractRetrier) ctx.getBean(retryImpl);
             bean.setRetryCount(++retryCount);
-            bean.start(deserialized, retryContext);
+            bean.startAttempt(deserialized, retryContext);
         } catch (ClassNotFoundException e) {
             throw new QuartzRetryException("Could not create bean " + className, e);
         }
