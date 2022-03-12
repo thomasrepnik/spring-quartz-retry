@@ -6,16 +6,7 @@ import java.util.UUID;
 public class Payload implements Serializable {
 
     private String name = UUID.randomUUID().toString();
-    private String result;
     private RetryState state = RetryState.NEW;
-
-    public String getResult() {
-        return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-    }
 
     public RetryState getState() {
         return state;
