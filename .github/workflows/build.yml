@@ -39,4 +39,4 @@ jobs:
           -Dsonar.projectKey=thomasrepnik_spring-quartz-retry
           -Dsonar.projectBaseDir=lib
           -Dsonar.projectName=spring-quartz-retry
-          -Dsonar.projectDescription=Spring Quartz Retry offers a simple, lightweight retry mechanism using the quartz scheduler.
+          -Dsonar.projectDescription="Spring Quartz Retry offers a simple, lightweight retry mechanism using the quartz scheduler."
