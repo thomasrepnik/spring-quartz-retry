@@ -33,15 +33,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
-        with:
-          projectBaseDir: lib
-          args: >
-            -Dsonar.organization=thomasrepnik-github
-            -Dsonar.projectKey=thomasrepnik_spring-quartz-retry
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
+        run: > 
+          mvn -B verify org.sonarsource.scanner.maven:sonar 
+          -Dsonar.organization=thomasrepnik-github 
+          -Dsonar.projectKey=thomasrepnik_spring-quartz-retry
+          -Dsonar.projectBaseDir=lib
