@@ -1,5 +1,6 @@
 # Spring Quartz Retry
 [![Build](https://github.com/thomasrepnik/spring-quartz-retry/actions/workflows/build.yml/badge.svg)](https://github.com/thomasrepnik/spring-quartz-retry/actions/workflows/build.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=thomasrepnik_spring-quartz-retry&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=thomasrepnik_spring-quartz-retry)
 
 Spring Quartz Retry offers a simple, lightweight retry mechanism using the quartz scheduler.
 
