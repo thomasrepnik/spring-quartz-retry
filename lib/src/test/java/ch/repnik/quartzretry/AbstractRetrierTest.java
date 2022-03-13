@@ -4,10 +4,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 
 import static ch.repnik.quartzretry.RetryInterval.retry;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.*;
 import static org.quartz.DateBuilder.IntervalUnit.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -104,7 +107,10 @@ class AbstractRetrierTest {
 
             @Override
             protected void onError(String s, Exception e, RetryContext ctx) {
-                Assertions.fail("Should not have been called");
+                assertThat(s, is("yolo"));
+                assertThat(e, instanceOf(IllegalArgumentException.class));
+                assertThat(e.getMessage(), is("oops"));
+                assertThat(ctx.getRetryCount(), is(0)); //No retry has been initiated so far
             }
 
             @Override
@@ -119,5 +125,51 @@ class AbstractRetrierTest {
         testee.startAttempt("yolo");
 
     }
+
+
+    @Test
+    void startAttempt_withSchedulerException_throwsException() throws Exception {
+
+        TestRetrierAdapter testee = new TestRetrierAdapter<String, Integer>() {
+
+            @Override
+            protected RetryInterval[] getRetryInterval() {
+                return new RetryInterval[]{ retry(2, SECOND) };
+            }
+
+            @Override
+            protected Integer process(String s, RetryContext ctx) {
+                throw new IllegalArgumentException("oops");
+            }
+
+            @Override
+            protected void onSuccess(String s, Integer integer, RetryContext ctx) {
+                Assertions.fail("Should not have been called");
+            }
+
+            @Override
+            protected void onError(String s, Exception e, RetryContext ctx) {
+
+            }
+
+            @Override
+            protected void onFailure(String s, Exception e, RetryContext ctx) {
+                Assertions.fail("Should not have been called");
+            }
+        };
+
+        Scheduler scheduler = mock(Scheduler.class);
+        doThrow(new QuartzRetryException("oops", mock(Exception.class))).when(scheduler).addJob(any(), anyBoolean());
+        testee.setScheduler(scheduler);
+
+        Assertions.assertThrows(QuartzRetryException.class, () -> {
+            testee.startAttempt("yolo");
+        });
+
+
+    }
+
+
+
 
 }
