@@ -9,8 +9,9 @@ final class RetryConstants {
         //No instantiation supported
     }
 
-    static final String JOB_NAME = "QuartzJob";
-    static final String JOB_GROUP = "QuartzJob";
+    static final String JOB_NAME = "RetryJob";
+    static final String JOB_GROUP = "RetryJobs";
+    static final String TRIGGER_GROUP = "RetryTriggers";
     static final String DATA_MAP_CLASSNAME = "classname";
     static final String DATA_MAP_PAYLOAD = "payload";
     static final String DATA_MAP_RETRY_COUNT = "retryCount";

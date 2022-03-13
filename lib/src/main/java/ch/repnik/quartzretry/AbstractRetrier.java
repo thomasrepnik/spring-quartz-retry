@@ -8,6 +8,7 @@ import org.springframework.util.SerializationUtils;
 import java.io.Serializable;
 import java.util.UUID;
 
+import static ch.repnik.quartzretry.RetryConstants.*;
 import static org.quartz.DateBuilder.futureDate;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 
@@ -20,6 +21,7 @@ public abstract class AbstractRetrier<P extends Serializable, R> {
 
     private Scheduler scheduler;
     private int retryCount = 0;
+    private String classname;
 
     protected abstract R process(P payload, RetryContext ctx);
 
@@ -37,6 +39,14 @@ public abstract class AbstractRetrier<P extends Serializable, R> {
      */
     void setRetryCount(int retryCount){
         this.retryCount = retryCount;
+    }
+
+    /**
+     * Only for testing purposes. Don't use!
+     * @param scheduler The current quartz scheduler instance
+     */
+    void setClassname(String classname){
+        this.classname = classname;
     }
 
     /**
@@ -100,7 +110,7 @@ public abstract class AbstractRetrier<P extends Serializable, R> {
      */
     private JobDetail job() {
         return JobBuilder.newJob(RetryJob.class)
-                .withIdentity("QuartzJob", "QuartzJob")
+                .withIdentity(JOB_NAME, JOB_GROUP)
                 .storeDurably()
                 .build();
     }
@@ -114,21 +124,21 @@ public abstract class AbstractRetrier<P extends Serializable, R> {
     private Trigger trigger(P payload, RetryContext ctx) {
 
         JobDataMap dataMap = new JobDataMap();
-        dataMap.put("payload", SerializationUtils.serialize(payload));
-        dataMap.put("classname", this.getClass().getName());
-        dataMap.put("retryCount", this.retryCount);
-        dataMap.put("retryContext", SerializationUtils.serialize(ctx));
+        dataMap.put(DATA_MAP_PAYLOAD, SerializationUtils.serialize(payload));
+        dataMap.put(DATA_MAP_CLASSNAME, this.classname != null ? this.classname:this.getClass().getName());
+        dataMap.put(DATA_MAP_RETRY_COUNT, this.retryCount);
+        dataMap.put(DATA_MAP_RETRY_CONTEXT, SerializationUtils.serialize(ctx));
 
 
         RetryInterval interval = getRetryInterval()[this.retryCount];
 
         return TriggerBuilder.newTrigger()
-                .forJob("QuartzJob", "QuartzJob")
+                .forJob(JOB_NAME, JOB_GROUP)
                 .startAt(
                         futureDate(interval.getNumber(), interval.getUnit())
                 )
                 .withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow())
-                .withIdentity(UUID.randomUUID().toString(), "retry-trigger")
+                .withIdentity(UUID.randomUUID().toString(), TRIGGER_GROUP)
                 .usingJobData(dataMap)
                 .build();
 
