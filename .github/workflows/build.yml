@@ -34,7 +34,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: > 
-          mvn -B verify org.sonarsource.scanner.maven:sonar 
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
           -Dsonar.organization=thomasrepnik-github 
           -Dsonar.projectKey=thomasrepnik_spring-quartz-retry
           -Dsonar.projectBaseDir=lib
