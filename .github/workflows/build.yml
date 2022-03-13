@@ -40,3 +40,13 @@ jobs:
           -Dsonar.projectBaseDir=lib
           -Dsonar.projectName=spring-quartz-retry
           -Dsonar.projectDescription="Spring Quartz Retry offers a simple, lightweight retry mechanism using the quartz scheduler."
+      - name: Publish to Maven Central
+        uses: samuelmeuli/action-maven-publish@v1
+        with:
+          directory: lib
+          maven_goals_phases: deploy
+          maven_args: "-DskipTests=true -DskipITs=true"
+          gpg_private_key: ${{ secrets.gpg_private_key }}
+          gpg_passphrase: ${{ secrets.gpg_passphrase }}
+          nexus_username: ${{ secrets.nexus_username }}
+          nexus_password: ${{ secrets.nexus_password }}
