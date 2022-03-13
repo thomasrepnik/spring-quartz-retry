@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 @Component
 @DisallowConcurrentExecution
-public class RetryJob implements Job {
+class RetryJob implements Job {
 
     private ApplicationContext ctx;
 
@@ -62,7 +62,7 @@ public class RetryJob implements Job {
         ) {
             o = is.readObject();
         } catch (Exception e) {
-            throw new QuartzRetryException("Could not deserialize object from quartz jobDataMap");
+            throw new QuartzRetryException("Could not deserialize object from quartz jobDataMap", e);
         }
         return o;
     }

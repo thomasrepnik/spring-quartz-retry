@@ -11,56 +11,82 @@ import java.util.UUID;
 import static org.quartz.DateBuilder.futureDate;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 
-public abstract class AbstractRetrier<T extends Serializable, S> {
+/**
+ * Extend this class for adding quartz retry to your application
+ * @param <P> Type of the payload (e.g. could be a DTO for sending to a remote service)
+ * @param <R> Type of the result (e.g. the response type of the remote service)
+ */
+public abstract class AbstractRetrier<P extends Serializable, R> {
 
     private Scheduler scheduler;
     private int retryCount = 0;
 
-    protected abstract S process(T t, RetryContext ctx);
+    protected abstract R process(P payload, RetryContext ctx);
 
     protected abstract RetryInterval[] getRetryInterval();
 
-    protected abstract void onError(T t, Exception e, RetryContext ctx);
+    protected abstract void onError(P payload, Exception e, RetryContext ctx);
 
-    protected abstract void onSuccess(T t, S s, RetryContext ctx);
+    protected abstract void onSuccess(P payload, R result, RetryContext ctx);
 
-    protected abstract void onFailure(T t, Exception e, RetryContext ctx);
+    protected abstract void onFailure(P payload, Exception e, RetryContext ctx);
 
+    /**
+     * Internal method for setting the retry count after reading it from quartz jobDataMap.
+     * @param retryCount Current retry count
+     */
     void setRetryCount(int retryCount){
         this.retryCount = retryCount;
     }
-    
+
+    /**
+     * Sets the current quartz scheduler automatically by injection
+     * There should not be a need to call this method manually.
+     * @param scheduler The current quartz scheduler instance
+     */
     @Autowired
     public final void setScheduler(Scheduler scheduler){
         this.scheduler = scheduler;
     }
 
+    /**
+     * Reset the retryCount to 0
+     */
     private void resetRetryCount(){
         this.retryCount = 0;
     }
 
-    public void startAttempt(T t){
-        startAttempt(t, new RetryContext());
+    /**
+     * Starts the retry attempt
+     * @param payload The payload object to process
+     */
+    public void startAttempt(P payload){
+        startAttempt(payload, new RetryContext());
     }
 
-    public void startAttempt(T t, RetryContext ctx){
+    /**
+     * Starts the retry atttempt
+     * @param payload The payload object to process
+     * @param ctx The current RetryContext
+     */
+    public void startAttempt(P payload, RetryContext ctx){
 
         ctx.setRetryCount(this.retryCount);
 
         try{
-            S s = process(t, ctx);
-            onSuccess(t, s, ctx);
+            R result = process(payload, ctx);
+            onSuccess(payload, result, ctx);
             resetRetryCount();
         } catch (Exception e) {
 
             if (this.retryCount > getRetryInterval().length - 1){
-                onFailure(t, e, ctx);
+                onFailure(payload, e, ctx);
                 resetRetryCount();
             } else {
                 try {
-                    onError(t, e, ctx);
+                    onError(payload, e, ctx);
                 }finally{
-                    persistNewTrigger(t, e, ctx);
+                    persistNewTrigger(payload, ctx);
                 }
             }
 
@@ -68,6 +94,10 @@ public abstract class AbstractRetrier<T extends Serializable, S> {
 
     }
 
+    /**
+     * Creates the quartz job used for the retries
+     * @return the created quartz job
+     */
     private JobDetail job() {
         return JobBuilder.newJob(RetryJob.class)
                 .withIdentity("QuartzJob", "QuartzJob")
@@ -75,11 +105,16 @@ public abstract class AbstractRetrier<T extends Serializable, S> {
                 .build();
     }
 
-
-    private Trigger trigger(String triggerName, T t, RetryContext ctx) {
+    /**
+     * Creates a new trigger for the next retry and fills the quartz jobDataMap.
+     * @param payload the payload which was tried to process. It will be stored for the next retry.
+     * @param ctx the current RetryContext
+     * @return the created quartz trigger
+     */
+    private Trigger trigger(P payload, RetryContext ctx) {
 
         JobDataMap dataMap = new JobDataMap();
-        dataMap.put("payload", SerializationUtils.serialize(t));
+        dataMap.put("payload", SerializationUtils.serialize(payload));
         dataMap.put("classname", this.getClass().getName());
         dataMap.put("retryCount", this.retryCount);
         dataMap.put("retryContext", SerializationUtils.serialize(ctx));
@@ -99,13 +134,18 @@ public abstract class AbstractRetrier<T extends Serializable, S> {
 
     }
 
-    private void persistNewTrigger(T t, Exception e, RetryContext ctx) {
+    /**
+     * Persists a new trigger to the quartz job. This Method ist schedulung the next execution.
+     * @param payload the payload which should be processed with the next retry
+     * @param ctx the current RetryContext
+     */
+    private void persistNewTrigger(P payload, RetryContext ctx) {
 
         try{
             this.scheduler.addJob(job(), true);
-            this.scheduler.scheduleJob(trigger("QuartzJob", t, ctx));
+            this.scheduler.scheduleJob(trigger(payload, ctx));
         } catch (SchedulerException ex) {
-            throw new QuartzRetryException("Error while scheduling new quartz trigger for retry", e);
+            throw new QuartzRetryException("Error while scheduling new quartz trigger for retry", ex);
         }
     }
 
