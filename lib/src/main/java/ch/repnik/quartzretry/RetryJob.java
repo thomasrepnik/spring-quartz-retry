@@ -11,7 +11,9 @@ import java.io.Serializable;
 
 import static ch.repnik.quartzretry.RetryConstants.*;
 
-
+/**
+ * Internal quartz job which will be executed in case of a firing retry trigger
+ */
 @Component
 @DisallowConcurrentExecution
 class RetryJob implements Job {
@@ -23,6 +25,11 @@ class RetryJob implements Job {
         this.ctx = ctx;
     }
 
+    /**
+     * This method holds the main logic for processing a retry trigger.
+     * The last state will be restored and the appropriate bean will be called with the same payload and retryContext.
+     * @param jobExecutionContext quartz execution context
+     */
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
 
@@ -46,8 +53,8 @@ class RetryJob implements Job {
     }
 
     /**
-     * Wird benötigt damit es mit den Spring DevTools funktioniert (da dort ein anderer Classloader verwendet wird)
-     * Siehe auch https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using.devtools.restart.customizing-the-classload
+     * This method is needed to support compatibility with spring devtools (because they use another classloader)
+     * see https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using.devtools.restart.customizing-the-classload
      * @param in serialized byteArray
      * @return deserialized Object
      */
@@ -67,6 +74,5 @@ class RetryJob implements Job {
         }
         return o;
     }
-
 
 }
