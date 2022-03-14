@@ -24,7 +24,7 @@ Create a new spring component by extending `QuartzRetry`
 ```java
 @Component
 public class Caller extends QuartzRetry<Payload, String> {
-//This Class takes a request type of Payload and returns a String if the exection succeeds
+//This Class takes a request type of Payload and returns a String if the execution succeeds
     
     @Autowired
     private MailService mailService; //Just a dummy service for demonstration
@@ -58,7 +58,7 @@ public class Caller extends QuartzRetry<Payload, String> {
 
     @Override
     protected void onFailure(Payload payload, Exception e, RetryContext ctx) {
-        //This method will be executed when all retries has failed.
+        //This method will be executed when all retries have failed.
     }
 }
 ```
