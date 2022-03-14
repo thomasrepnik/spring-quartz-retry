@@ -17,7 +17,7 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
  * @param <P> Type of the payload (e.g. could be a DTO for sending to a remote service)
  * @param <R> Type of the result (e.g. the response type of the remote service)
  */
-public abstract class AbstractRetrier<P extends Serializable, R> {
+public abstract class QuartzRetry<P extends Serializable, R> {
 
     private Scheduler scheduler;
     private int retryCount = 0;
@@ -70,8 +70,8 @@ public abstract class AbstractRetrier<P extends Serializable, R> {
      * Starts the retry attempt
      * @param payload The payload object to process
      */
-    public void startAttempt(P payload){
-        startAttempt(payload, new RetryContext());
+    public void execute(P payload){
+        execute(payload, new RetryContext());
     }
 
     /**
@@ -79,7 +79,7 @@ public abstract class AbstractRetrier<P extends Serializable, R> {
      * @param payload The payload object to process
      * @param ctx The current RetryContext
      */
-    public void startAttempt(P payload, RetryContext ctx){
+    public void execute(P payload, RetryContext ctx){
 
         ctx.setRetryCount(this.retryCount);
 

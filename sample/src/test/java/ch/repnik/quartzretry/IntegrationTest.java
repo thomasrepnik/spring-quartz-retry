@@ -1,18 +1,10 @@
 package ch.repnik.quartzretry;
 
-import ch.repnik.quartzretry.AbstractRetrier;
-import ch.repnik.quartzretry.RetryContext;
-import ch.repnik.quartzretry.RetryInterval;
-import ch.repnik.quartzretrysample.service.Caller;
-import ch.repnik.quartzretrysample.service.Payload;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
-import org.mockito.Spy;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 import java.util.List;
@@ -37,7 +29,7 @@ public class IntegrationTest {
     void executeQuartzRetry_multipleRetries_success() throws Exception {
 
         //Arrange
-        AbstractRetrier<String, String> retrier = new RetrierAdapter<>() {
+        QuartzRetry<String, String> retrier = new RetrierAdapter<>() {
             @Override
             protected String process(String payload, RetryContext ctx) {
                 switch (ctx.getRetryCount()) {
@@ -60,14 +52,14 @@ public class IntegrationTest {
         };
 
 
-        AbstractRetrier<String, String> spiedRetrier = spy(retrier);
+        QuartzRetry<String, String> spiedRetrier = spy(retrier);
 
-        ctx.registerBean("IntegrationTestRetrier", AbstractRetrier.class, () -> spiedRetrier);
+        ctx.registerBean("IntegrationTestRetrier", QuartzRetry.class, () -> spiedRetrier);
         spiedRetrier.setClassname("IntegrationTestRetrier");
         spiedRetrier.setScheduler(scheduler);
 
         //Act
-        spiedRetrier.startAttempt("let's go");
+        spiedRetrier.execute("let's go");
         Thread.sleep(3000);
 
         //Assert
@@ -85,7 +77,7 @@ public class IntegrationTest {
     void executeQuartzRetry_multipleRetries_failure() throws Exception {
 
         //Arrange
-        AbstractRetrier<String, String> retrier = new RetrierAdapter<>() {
+        QuartzRetry<String, String> retrier = new RetrierAdapter<>() {
             @Override
             protected String process(String payload, RetryContext ctx) {
                 throw new IllegalArgumentException("oops");
@@ -101,14 +93,14 @@ public class IntegrationTest {
         };
 
 
-        AbstractRetrier<String, String> spiedRetrier = spy(retrier);
+        QuartzRetry<String, String> spiedRetrier = spy(retrier);
 
-        ctx.registerBean("IntegrationTestRetrier2", AbstractRetrier.class, () -> spiedRetrier);
+        ctx.registerBean("IntegrationTestRetrier2", QuartzRetry.class, () -> spiedRetrier);
         spiedRetrier.setClassname("IntegrationTestRetrier2");
         spiedRetrier.setScheduler(scheduler);
 
         //Act
-        spiedRetrier.startAttempt("let's go");
+        spiedRetrier.execute("let's go");
         Thread.sleep(3000);
 
         //Assert
@@ -127,7 +119,7 @@ public class IntegrationTest {
     void executeQuartzRetry_correktMisfireInstructions_triggersExecuted() throws Exception {
 
         //Arrange
-        AbstractRetrier<String, String> retrier = new RetrierAdapter<>() {
+        QuartzRetry<String, String> retrier = new RetrierAdapter<>() {
             @Override
             protected String process(String payload, RetryContext ctx) {
                 throw new IllegalArgumentException("oops");
@@ -143,14 +135,14 @@ public class IntegrationTest {
         };
 
 
-        AbstractRetrier<String, String> spiedRetrier = spy(retrier);
+        QuartzRetry<String, String> spiedRetrier = spy(retrier);
 
-        ctx.registerBean("IntegrationTestRetrier3", AbstractRetrier.class, () -> spiedRetrier);
+        ctx.registerBean("IntegrationTestRetrier3", QuartzRetry.class, () -> spiedRetrier);
         spiedRetrier.setClassname("IntegrationTestRetrier3");
         spiedRetrier.setScheduler(scheduler);
 
         //Act
-        spiedRetrier.startAttempt("let's go");
+        spiedRetrier.execute("let's go");
         Thread.sleep(500);
 
         assertThat(getRetryTriggers(), hasSize(1));

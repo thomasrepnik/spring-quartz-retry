@@ -37,9 +37,9 @@ class RetryJob implements Job {
         RetryContext retryContext = (RetryContext) deserialize(serializedRetryContext);
 
         try {
-            AbstractRetrier bean = (AbstractRetrier) ctx.getBean(className);
+            QuartzRetry bean = (QuartzRetry) ctx.getBean(className);
             bean.setRetryCount(++retryCount);
-            bean.startAttempt(deserialized, retryContext);
+            bean.execute(deserialized, retryContext);
         } catch (NoSuchBeanDefinitionException e) {
             throw new QuartzRetryException("Could not create bean " + className, e);
         }

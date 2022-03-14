@@ -2,7 +2,7 @@ package ch.repnik.quartzretry;
 
 import java.io.Serializable;
 
-public class TestRetrierAdapter<T extends Serializable, S> extends AbstractRetrier<T, S> {
+public class TestRetrierAdapter<T extends Serializable, S> extends QuartzRetry<T, S> {
 
     @Override
     protected S process(T t, RetryContext ctx) {

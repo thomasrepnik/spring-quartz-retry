@@ -4,20 +4,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 
 import static ch.repnik.quartzretry.RetryInterval.retry;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 import static org.quartz.DateBuilder.IntervalUnit.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractRetrierTest {
+class QuartzRetryTest {
 
     @Test
     void startAttempt_withoutErros_callsOnSuccess() {
@@ -47,7 +46,7 @@ class AbstractRetrierTest {
             }
         };
 
-        testee.startAttempt("yolo");
+        testee.execute("yolo");
 
     }
 
@@ -86,7 +85,9 @@ class AbstractRetrierTest {
         };
 
         testee.setScheduler(mock(Scheduler.class));
-        testee.startAttempt("yolo");
+        testee.setRetryCount(0);
+        testee.setClassname("foo");
+        testee.execute("yolo");
 
     }
 
@@ -122,7 +123,7 @@ class AbstractRetrierTest {
         };
 
         testee.setScheduler(mock(Scheduler.class));
-        testee.startAttempt("yolo");
+        testee.execute("yolo");
 
     }
 
@@ -159,11 +160,11 @@ class AbstractRetrierTest {
         };
 
         Scheduler scheduler = mock(Scheduler.class);
-        doThrow(new QuartzRetryException("oops", mock(Exception.class))).when(scheduler).addJob(any(), anyBoolean());
+        doThrow(new SchedulerException("oops")).when(scheduler).addJob(any(), anyBoolean());
         testee.setScheduler(scheduler);
 
         Assertions.assertThrows(QuartzRetryException.class, () -> {
-            testee.startAttempt("yolo");
+            testee.execute("yolo");
         });
 
 

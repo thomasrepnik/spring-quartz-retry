@@ -1,6 +1,6 @@
 package ch.repnik.quartzretrysample.service;
 
-import ch.repnik.quartzretry.AbstractRetrier;
+import ch.repnik.quartzretry.QuartzRetry;
 import ch.repnik.quartzretry.RetryContext;
 import ch.repnik.quartzretry.RetryInterval;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import static ch.repnik.quartzretry.RetryInterval.retry;
 import static org.quartz.DateBuilder.IntervalUnit.*;
 
 @Component
-public class Caller extends AbstractRetrier<Payload, String> {
+public class Caller extends QuartzRetry<Payload, String> {
 
     @Override
     protected String process(Payload payload, RetryContext ctx) {
