@@ -21,7 +21,7 @@ public class RetryInterval {
      * @param unit IntervalUnit to use
      * @return instance of RetryInterval with the specified timeout data.
      */
-    public static final RetryInterval retry(int number, DateBuilder.IntervalUnit unit){
+    public static RetryInterval retry(int number, DateBuilder.IntervalUnit unit){
         return new RetryInterval(number, unit);
     }
 

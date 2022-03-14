@@ -43,7 +43,7 @@ public abstract class QuartzRetry<P extends Serializable, R> {
 
     /**
      * Only for testing purposes. Don't use!
-     * @param scheduler The current quartz scheduler instance
+     * @param classname the classname of the bean extending QuartzRetry
      */
     void setClassname(String classname){
         this.classname = classname;
