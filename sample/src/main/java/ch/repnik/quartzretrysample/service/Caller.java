@@ -2,12 +2,12 @@ package ch.repnik.quartzretrysample.service;
 
 import ch.repnik.quartzretry.QuartzRetry;
 import ch.repnik.quartzretry.RetryContext;
-import ch.repnik.quartzretry.RetryInterval;
+import ch.repnik.quartzretry.RetryTimeout;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-import static ch.repnik.quartzretry.RetryInterval.retry;
+import static ch.repnik.quartzretry.RetryTimeout.timeout;
 import static org.quartz.DateBuilder.IntervalUnit.*;
 
 @Component
@@ -39,11 +39,11 @@ public class Caller extends QuartzRetry<Payload, String> {
     }
 
     @Override
-    protected RetryInterval[] getRetryInterval() {
-        return new RetryInterval[] {
-                retry(3, SECOND),
-                retry(10, SECOND),
-                retry(5, SECOND)
+    protected RetryTimeout[] getRetryTimeouts() {
+        return new RetryTimeout[] {
+                timeout(3, SECOND),
+                timeout(10, SECOND),
+                timeout(5, SECOND)
         };
     }
 

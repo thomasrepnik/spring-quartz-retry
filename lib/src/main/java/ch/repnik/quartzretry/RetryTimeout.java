@@ -5,24 +5,24 @@ import org.quartz.DateBuilder;
 /**
  * This class holds all data to define the timeout between retries.
  */
-public class RetryInterval {
+public class RetryTimeout {
 
     private final int number;
     private final DateBuilder.IntervalUnit unit;
 
-    private RetryInterval(int number, DateBuilder.IntervalUnit unit){
+    private RetryTimeout(int number, DateBuilder.IntervalUnit unit){
         this.number = number;
         this.unit = unit;
     }
 
     /**
-     * Creates an instance of RetyInterval with the defined timeout.
+     * Creates an instance of RetryTimeout with the defined timeout.
      * @param number number to use with the unit
      * @param unit IntervalUnit to use
-     * @return instance of RetryInterval with the specified timeout data.
+     * @return instance of RetryTimeout with the specified timeout data.
      */
-    public static RetryInterval retry(int number, DateBuilder.IntervalUnit unit){
-        return new RetryInterval(number, unit);
+    public static RetryTimeout timeout(int number, DateBuilder.IntervalUnit unit){
+        return new RetryTimeout(number, unit);
     }
 
     /**

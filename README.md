@@ -10,9 +10,75 @@ For using this library your project needs
 * to support injection for the quartz `Scheduler`
 
 ## Getting started
+
 Add the following Maven Dependency to your project
-```
-first released version will be available in the next few days
+```xml
+<dependency>
+    <groupId>ch.repnik.quartz-retry</groupId>
+    <artifactId>spring-quartz-retry</artifactId>
+    <version>1.0.0</version>
+</dependency>
 ```
 
- 
+Create a new spring component by extending `QuartzRetry`
+```java
+@Component
+public class Caller extends QuartzRetry<Payload, String> {
+//This Class takes a request type of Payload and returns a String if the exection succeeds
+    
+    @Autowired
+    private MailService mailService; //Just a dummy service for demonstration
+    
+    @Override
+    protected String process(Payload payload, RetryContext ctx) {
+        //If this method throws any kind of RuntimeException the execution will be retried
+        return mailService.send(payload);
+    }
+
+    @Override
+    protected RetryTimeout[] getRetryTimeouts() {
+        //In case of a failing process-method three retries will be scheduled with the defined timeouts
+        return new RetryTimeout[] {
+                retry(3, SECOND),
+                retry(10, SECOND),
+                retry(5, SECOND)
+        };
+    }
+
+    @Override
+    protected void onError(Payload entity, Exception e, RetryContext ctx) {
+        //This method will be executed when a retry attempt has failed
+    }
+
+    @Override
+    protected void onSuccess(Payload entity, String s, RetryContext ctx) {
+        //This method will be executed when the process method was successful
+        //The second Parameter (String s) will be the return value of the process-Method
+    }
+
+    @Override
+    protected void onFailure(Payload payload, Exception e, RetryContext ctx) {
+        //This method will be executed when all retries has failed.
+    }
+}
+```
+
+After providing your implementation, you can just call the `execute` method
+
+```java
+@Service
+public class SampleService {
+
+    @Autowired
+    private Caller caller;
+    
+    public void startWithRetry() {
+        caller.execute(new Payload());
+    }
+
+}
+```
+
+That's it!
+
+For a full and running sample please check the sample Directory

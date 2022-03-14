@@ -10,8 +10,8 @@ public class TestRetrierAdapter<T extends Serializable, S> extends QuartzRetry<T
     }
 
     @Override
-    protected RetryInterval[] getRetryInterval() {
-        return new RetryInterval[0];
+    protected RetryTimeout[] getRetryTimeouts() {
+        return new RetryTimeout[0];
     }
 
     @Override

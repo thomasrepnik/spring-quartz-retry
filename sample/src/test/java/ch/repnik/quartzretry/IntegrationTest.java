@@ -9,7 +9,6 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 
 import java.util.List;
 
-import static ch.repnik.quartzretry.RetryInterval.retry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,11 +41,11 @@ public class IntegrationTest {
             }
 
             @Override
-            protected RetryInterval[] getRetryInterval() {
-                return new RetryInterval[]{
-                        retry(1, DateBuilder.IntervalUnit.SECOND),
-                        retry(1, DateBuilder.IntervalUnit.SECOND),
-                        retry(1, DateBuilder.IntervalUnit.SECOND)
+            protected RetryTimeout[] getRetryTimeouts() {
+                return new RetryTimeout[]{
+                        RetryTimeout.timeout(1, DateBuilder.IntervalUnit.SECOND),
+                        RetryTimeout.timeout(1, DateBuilder.IntervalUnit.SECOND),
+                        RetryTimeout.timeout(1, DateBuilder.IntervalUnit.SECOND)
                 };
             }
         };
@@ -84,10 +83,10 @@ public class IntegrationTest {
             }
 
             @Override
-            protected RetryInterval[] getRetryInterval() {
-                return new RetryInterval[]{
-                        retry(1, DateBuilder.IntervalUnit.SECOND),
-                        retry(1, DateBuilder.IntervalUnit.SECOND)
+            protected RetryTimeout[] getRetryTimeouts() {
+                return new RetryTimeout[]{
+                        RetryTimeout.timeout(1, DateBuilder.IntervalUnit.SECOND),
+                        RetryTimeout.timeout(1, DateBuilder.IntervalUnit.SECOND)
                 };
             }
         };
@@ -126,10 +125,10 @@ public class IntegrationTest {
             }
 
             @Override
-            protected RetryInterval[] getRetryInterval() {
-                return new RetryInterval[]{
-                        retry(2, DateBuilder.IntervalUnit.SECOND),
-                        retry(1, DateBuilder.IntervalUnit.SECOND)
+            protected RetryTimeout[] getRetryTimeouts() {
+                return new RetryTimeout[]{
+                        RetryTimeout.timeout(2, DateBuilder.IntervalUnit.SECOND),
+                        RetryTimeout.timeout(1, DateBuilder.IntervalUnit.SECOND)
                 };
             }
         };

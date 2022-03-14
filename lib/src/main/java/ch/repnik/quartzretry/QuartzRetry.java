@@ -25,7 +25,7 @@ public abstract class QuartzRetry<P extends Serializable, R> {
 
     protected abstract R process(P payload, RetryContext ctx);
 
-    protected abstract RetryInterval[] getRetryInterval();
+    protected abstract RetryTimeout[] getRetryTimeouts();
 
     protected abstract void onError(P payload, Exception e, RetryContext ctx);
 
@@ -89,7 +89,7 @@ public abstract class QuartzRetry<P extends Serializable, R> {
             resetRetryCount();
         } catch (Exception e) {
 
-            if (this.retryCount > getRetryInterval().length - 1){
+            if (this.retryCount > getRetryTimeouts().length - 1){
                 onFailure(payload, e, ctx);
                 resetRetryCount();
             } else {
@@ -130,7 +130,7 @@ public abstract class QuartzRetry<P extends Serializable, R> {
         dataMap.put(DATA_MAP_RETRY_CONTEXT, SerializationUtils.serialize(ctx));
 
 
-        RetryInterval interval = getRetryInterval()[this.retryCount];
+        RetryTimeout interval = getRetryTimeouts()[this.retryCount];
 
         return TriggerBuilder.newTrigger()
                 .forJob(JOB_NAME, JOB_GROUP)

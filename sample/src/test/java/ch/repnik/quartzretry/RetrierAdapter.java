@@ -10,8 +10,8 @@ public class RetrierAdapter<P extends Serializable, R> extends QuartzRetry<P, R>
     }
 
     @Override
-    protected RetryInterval[] getRetryInterval() {
-        return new RetryInterval[0];
+    protected RetryTimeout[] getRetryTimeouts() {
+        return new RetryTimeout[0];
     }
 
     @Override

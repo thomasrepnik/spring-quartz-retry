@@ -7,7 +7,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 
-import static ch.repnik.quartzretry.RetryInterval.retry;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -56,8 +55,8 @@ class QuartzRetryTest {
         TestRetrierAdapter testee = new TestRetrierAdapter<String, Integer>() {
 
             @Override
-            protected RetryInterval[] getRetryInterval() {
-                return new RetryInterval[]{ retry(2, SECOND) };
+            protected RetryTimeout[] getRetryTimeouts() {
+                return new RetryTimeout[]{ RetryTimeout.timeout(2, SECOND) };
             }
 
             @Override
@@ -134,8 +133,8 @@ class QuartzRetryTest {
         TestRetrierAdapter testee = new TestRetrierAdapter<String, Integer>() {
 
             @Override
-            protected RetryInterval[] getRetryInterval() {
-                return new RetryInterval[]{ retry(2, SECOND) };
+            protected RetryTimeout[] getRetryTimeouts() {
+                return new RetryTimeout[]{ RetryTimeout.timeout(2, SECOND) };
             }
 
             @Override
@@ -163,9 +162,7 @@ class QuartzRetryTest {
         doThrow(new SchedulerException("oops")).when(scheduler).addJob(any(), anyBoolean());
         testee.setScheduler(scheduler);
 
-        Assertions.assertThrows(QuartzRetryException.class, () -> {
-            testee.execute("yolo");
-        });
+        Assertions.assertThrows(QuartzRetryException.class, () -> testee.execute("yolo"));
 
 
     }
