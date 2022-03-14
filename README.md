@@ -39,9 +39,9 @@ public class Caller extends QuartzRetry<Payload, String> {
     protected RetryTimeout[] getRetryTimeouts() {
         //In case of a failing process-method three retries will be scheduled with the defined timeouts
         return new RetryTimeout[] {
-                retry(3, SECOND),
-                retry(10, SECOND),
-                retry(5, SECOND)
+                timeout(3, SECOND),
+                timeout(10, SECOND),
+                timeout(5, SECOND)
         };
     }
 
