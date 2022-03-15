@@ -2,9 +2,14 @@ package ch.repnik.quartzretry;
 
 
 import org.quartz.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.SerializationUtils;
 
+import javax.sql.DataSource;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -22,6 +27,9 @@ public abstract class QuartzRetry<P extends Serializable, R> {
     private Scheduler scheduler;
     private int retryCount = 0;
     private String classname;
+    private boolean isRetryDisabled;
+    private boolean isDatasourceBeanAvailable;
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuartzRetry.class);
 
     protected abstract R process(P payload, RetryContext ctx);
 
@@ -47,6 +55,28 @@ public abstract class QuartzRetry<P extends Serializable, R> {
      */
     void setClassname(String classname){
         this.classname = classname;
+    }
+
+    /**
+     * Performs some checks based on the given application context
+     * There should not be a need to call this method manually.
+     * @param appCtx The current application context
+     */
+    @Autowired
+    public final void setApplicationContext(ApplicationContext appCtx){
+        isRetryDisabled = Boolean.TRUE.equals(appCtx.getEnvironment().getProperty("quartz.retry.disabled", Boolean.class));
+        if (isRetryDisabled){
+            LOGGER.warn("Spring Quartz Retry will not perform any retries because 'quartz.retry.disabled' property is set to 'false'");
+        }
+
+        try{
+            appCtx.getBean(DataSource.class);
+            isDatasourceBeanAvailable = true;
+        }catch(NoSuchBeanDefinitionException e){
+            isDatasourceBeanAvailable = false;
+            LOGGER.warn("Spring Quartz Retry will not perform any retries because there is not Datasource available");
+        }
+
     }
 
     /**
@@ -89,7 +119,7 @@ public abstract class QuartzRetry<P extends Serializable, R> {
             resetRetryCount();
         } catch (Exception e) {
 
-            if (this.retryCount > getRetryTimeouts().length - 1){
+            if (isRetryDisabled || !isDatasourceBeanAvailable || this.retryCount > getRetryTimeouts().length - 1){
                 onFailure(payload, e, ctx);
                 resetRetryCount();
             } else {

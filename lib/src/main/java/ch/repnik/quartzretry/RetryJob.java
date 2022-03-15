@@ -43,7 +43,8 @@ class RetryJob implements Job {
         RetryContext retryContext = (RetryContext) deserialize(serializedRetryContext);
 
         try {
-            @SuppressWarnings("unchecked") QuartzRetry<Serializable, ?> bean = (QuartzRetry<Serializable, ?>) ctx.getBean(className);
+            Class<?> resolvedClass = Class.forName(className);
+            @SuppressWarnings("unchecked") QuartzRetry<Serializable, ?> bean = (QuartzRetry<Serializable, ?>) ctx.getBean(resolvedClass);
             bean.setRetryCount(++retryCount);
             bean.execute(deserialized, retryContext);
         } catch (Exception e) {

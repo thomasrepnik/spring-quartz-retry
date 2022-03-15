@@ -1,6 +1,7 @@
-package ch.repnik.quartzretrysample.jobs.controller;
+package ch.repnik.quartzretrysample.controller;
 
 import ch.repnik.quartzretrysample.service.SampleService;
+import ch.repnik.quartzretrysample.service.Payload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class SampleController {
 
     @Autowired
-    private SampleService service;
+    private SampleService sampleService;
 
-    @GetMapping("/call")
+    @GetMapping("/start")
     private ResponseEntity call(){
-        service.process();
+        sampleService.execute(new Payload());
         return ResponseEntity.ok().build();
     }
 
