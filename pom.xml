@@ -7,7 +7,7 @@
     <groupId>ch.repnik.quartz-retry</groupId>
     <artifactId>spring-quartz-retry-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <modules>
         <module>lib</module>
         <module>sample</module>

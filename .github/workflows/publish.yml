@@ -29,7 +29,6 @@ jobs:
       - name: Release Maven package
         uses: samuelmeuli/action-maven-publish@v1
         with:
-          directory: lib
           maven_goals_phases: deploy
           maven_args: "-DskipTests=true -DskipITs=true"
           gpg_private_key: ${{ secrets.gpg_private_key }}
