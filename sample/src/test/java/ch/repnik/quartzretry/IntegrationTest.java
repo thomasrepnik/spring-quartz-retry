@@ -56,6 +56,7 @@ public class IntegrationTest {
         ctx.registerBean("IntegrationTestRetrier", QuartzRetry.class, () -> spiedRetrier);
         spiedRetrier.setClassname("IntegrationTestRetrier");
         spiedRetrier.setScheduler(scheduler);
+        spiedRetrier.setApplicationContext(ctx);
 
         //Act
         spiedRetrier.execute("let's go");
@@ -97,6 +98,7 @@ public class IntegrationTest {
         ctx.registerBean("IntegrationTestRetrier2", QuartzRetry.class, () -> spiedRetrier);
         spiedRetrier.setClassname("IntegrationTestRetrier2");
         spiedRetrier.setScheduler(scheduler);
+        spiedRetrier.setApplicationContext(ctx);
 
         //Act
         spiedRetrier.execute("let's go");
@@ -115,7 +117,7 @@ public class IntegrationTest {
     }
 
     @Test
-    void executeQuartzRetry_correktMisfireInstructions_triggersExecuted() throws Exception {
+    void executeQuartzRetry_correctMisfireInstructions_triggersExecuted() throws Exception {
 
         //Arrange
         QuartzRetry<String, String> retrier = new RetrierAdapter<>() {
@@ -139,6 +141,7 @@ public class IntegrationTest {
         ctx.registerBean("IntegrationTestRetrier3", QuartzRetry.class, () -> spiedRetrier);
         spiedRetrier.setClassname("IntegrationTestRetrier3");
         spiedRetrier.setScheduler(scheduler);
+        spiedRetrier.setApplicationContext(ctx);
 
         //Act
         spiedRetrier.execute("let's go");
