@@ -74,7 +74,7 @@ public abstract class QuartzRetry<P extends Serializable, R> {
             isDatasourceBeanAvailable = true;
         }catch(NoSuchBeanDefinitionException e){
             isDatasourceBeanAvailable = false;
-            LOGGER.warn("Spring Quartz Retry will not perform any retries because there is not Datasource available");
+            LOGGER.warn("Spring Quartz Retry will not perform any retries because there is no DataSource available");
         }
 
     }

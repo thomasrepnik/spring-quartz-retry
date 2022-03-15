@@ -55,6 +55,7 @@ class RetryJobTest {
         assertThat(captor.getValue().getDataMap().entrySet(), everyItem(isIn(Collections.singletonMap("foo", "bar").entrySet())));
     }
 
+
     @Test
     void execute_beanNotFound_throwsException() {
         //Arrange

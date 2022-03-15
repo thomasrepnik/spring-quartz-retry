@@ -1,7 +1,6 @@
 package ch.repnik.quartzretry.config;
 
 import org.quartz.Trigger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,15 +17,9 @@ import javax.sql.DataSource;
 @EnableConfigurationProperties(QuartzRetryProperties.class)
 public class QuartzRetryAutoConfig {
 
-    @Autowired
-    private ApplicationContext context;
-
-    @Autowired
-    private DataSource dataSource;
-
     @Bean
     @ConditionalOnMissingBean
-    public SchedulerFactoryBean scheduler(SpringBeanJobFactory jobFactory, Trigger... triggers) {
+    public SchedulerFactoryBean scheduler(DataSource dataSource, SpringBeanJobFactory jobFactory, Trigger... triggers) {
         final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
 
         schedulerFactory.setOverwriteExistingJobs(false);
@@ -42,7 +35,7 @@ public class QuartzRetryAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public SpringBeanJobFactory springBeanJobFactory() {
+    public SpringBeanJobFactory springBeanJobFactory(ApplicationContext context) {
         final SpringBeanJobFactory jobFactory = new SpringBeanJobFactory();
         jobFactory.setApplicationContext(context);
         return jobFactory;

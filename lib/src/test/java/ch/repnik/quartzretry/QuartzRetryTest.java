@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
 import javax.sql.DataSource;
@@ -21,7 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 class QuartzRetryTest {
 
     @Test
-    void startAttempt_withoutErros_callsOnSuccess() {
+    void execute_withoutErros_callsOnSuccess() {
 
         TestRetrierAdapter testee = new TestRetrierAdapter<String, Integer>() {
 
@@ -53,7 +54,7 @@ class QuartzRetryTest {
     }
 
     @Test
-    void startAttempt_withErros_callsOnError() {
+    void execute_withErros_callsOnError() {
 
         ApplicationContext appCtx = mock(ApplicationContext.class, RETURNS_DEEP_STUBS);
         when(appCtx.getBean(DataSource.class)).thenReturn(mock(DataSource.class));
@@ -99,7 +100,97 @@ class QuartzRetryTest {
     }
 
     @Test
-    void startAttempt_withErrosAndNoRetry_callsOnFailure() {
+    void execute_disabled_callsOnFailure() {
+
+        ApplicationContext appCtx = mock(ApplicationContext.class, RETURNS_DEEP_STUBS);
+        when(appCtx.getBean(DataSource.class)).thenReturn(mock(DataSource.class));
+        when(appCtx.getEnvironment().getProperty("quartz.retry.disabled", Boolean.class)).thenReturn(true);
+
+        TestRetrierAdapter testee = new TestRetrierAdapter<String, Integer>() {
+
+            @Override
+            protected RetryTimeout[] getRetryTimeouts() {
+                return new RetryTimeout[]{ RetryTimeout.timeout(2, SECOND) };
+            }
+
+            @Override
+            protected Integer process(String s, RetryContext ctx) {
+                throw new IllegalArgumentException("oops");
+            }
+
+            @Override
+            protected void onSuccess(String s, Integer integer, RetryContext ctx) {
+                Assertions.fail("onSuccess should not have been called");
+            }
+
+            @Override
+            protected void onError(String s, Exception e, RetryContext ctx) {
+                Assertions.fail("onError should not have been called");
+            }
+
+            @Override
+            protected void onFailure(String s, Exception e, RetryContext ctx) {
+                assertThat(s, is("yolo"));
+                assertThat(ctx.getRetryCount(), is(0)); //Retries are disabled
+
+            }
+        };
+
+        testee.setApplicationContext(appCtx);
+        testee.setScheduler(mock(Scheduler.class));
+        testee.setRetryCount(0);
+        testee.setClassname("foo");
+        testee.execute("yolo");
+
+    }
+
+    @Test
+    void execute_withoutDatabase_callsOnFailure() {
+
+        ApplicationContext appCtx = mock(ApplicationContext.class, RETURNS_DEEP_STUBS);
+        when(appCtx.getBean(DataSource.class)).thenThrow(new NoSuchBeanDefinitionException("oops"));
+        when(appCtx.getEnvironment().getProperty("quartz.retry.disabled", Boolean.class)).thenReturn(false);
+
+        TestRetrierAdapter testee = new TestRetrierAdapter<String, Integer>() {
+
+            @Override
+            protected RetryTimeout[] getRetryTimeouts() {
+                return new RetryTimeout[]{ RetryTimeout.timeout(2, SECOND) };
+            }
+
+            @Override
+            protected Integer process(String s, RetryContext ctx) {
+                throw new IllegalArgumentException("oops");
+            }
+
+            @Override
+            protected void onSuccess(String s, Integer integer, RetryContext ctx) {
+                Assertions.fail("onSuccess should not have been called");
+            }
+
+            @Override
+            protected void onError(String s, Exception e, RetryContext ctx) {
+                Assertions.fail("onError should not have been called");
+            }
+
+            @Override
+            protected void onFailure(String s, Exception e, RetryContext ctx) {
+                assertThat(s, is("yolo"));
+                assertThat(ctx.getRetryCount(), is(0)); //Retries are disabled
+
+            }
+        };
+
+        testee.setApplicationContext(appCtx);
+        testee.setScheduler(mock(Scheduler.class));
+        testee.setRetryCount(0);
+        testee.setClassname("foo");
+        testee.execute("yolo");
+
+    }
+
+    @Test
+    void execute_withErrosAndNoRetry_callsOnFailure() {
 
         ApplicationContext appCtx = mock(ApplicationContext.class, RETURNS_DEEP_STUBS);
         when(appCtx.getBean(DataSource.class)).thenReturn(mock(DataSource.class));
@@ -141,7 +232,7 @@ class QuartzRetryTest {
 
 
     @Test
-    void startAttempt_withSchedulerException_throwsException() throws Exception {
+    void execute_withSchedulerException_throwsException() throws Exception {
 
         ApplicationContext appCtx = mock(ApplicationContext.class, RETURNS_DEEP_STUBS);
         when(appCtx.getBean(DataSource.class)).thenReturn(mock(DataSource.class));

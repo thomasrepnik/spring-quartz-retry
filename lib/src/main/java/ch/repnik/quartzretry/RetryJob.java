@@ -53,7 +53,12 @@ class RetryJob implements Job {
 
     }
 
-    Object createBean(String className){
+    /**
+     * Searches and creates a bean instance based on the classname
+     * @param className classname of the bean
+     * @return the bean instance
+     */
+    private Object createBean(String className){
         Class<?> resolvedClass;
 
         try{
