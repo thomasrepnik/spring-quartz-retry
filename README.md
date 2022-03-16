@@ -7,7 +7,7 @@ Spring Quartz Retry offers a simple, lightweight retry mechanism using the quart
 ## Prerequisites 
 For using this library your project needs
 * to be a spring-boot project
-* to support injection for the quartz `Scheduler`
+* to have quartz scheduler configured with persistent storage (database)
 
 ## Getting started
 
@@ -22,8 +22,8 @@ Add the following Maven Dependency to your project
 
 Create a new spring component by extending `QuartzRetry`
 ```java
-@Component
-public class Caller extends QuartzRetry<Payload, String> {
+@Service
+public class SampleService extends QuartzRetry<Payload, String> {
 //This Class takes a request type of Payload and returns a String if the execution succeeds
     
     @Autowired
@@ -31,7 +31,7 @@ public class Caller extends QuartzRetry<Payload, String> {
     
     @Override
     protected String process(Payload payload, RetryContext ctx) {
-        //If this method throws any kind of RuntimeException the execution will be retried
+        //If this method throws any kind of RuntimeException, the execution will be retried
         return mailService.send(payload);
     }
 
@@ -66,19 +66,20 @@ public class Caller extends QuartzRetry<Payload, String> {
 After providing your implementation, you can just call the `execute` method
 
 ```java
-@Service
-public class SampleService {
+@RestController
+public class SampleController {
 
     @Autowired
-    private Caller caller;
-    
-    public void startWithRetry() {
-        caller.execute(new Payload());
-    }
+    private SampleService sampleService;
 
+    @GetMapping("/start")
+    private ResponseEntity call(){
+        sampleService.execute(new Payload());
+        return ResponseEntity.ok().build();
+    }
 }
 ```
 
 That's it!
 
-For a full and running sample please check the sample Directory
+For a full and running sample please check the [sample](https://github.com/thomasrepnik/spring-quartz-retry/tree/master/sample) Directory
