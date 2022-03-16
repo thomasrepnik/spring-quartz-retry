@@ -82,4 +82,4 @@ public class SampleController {
 
 That's it!
 
-For a full and running sample please check the sample Directory
+For a full and running sample please check the [sample](https://github.com/thomasrepnik/spring-quartz-retry/tree/master/sample) Directory
