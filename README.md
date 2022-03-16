@@ -16,7 +16,7 @@ Add the following Maven Dependency to your project
 <dependency>
     <groupId>ch.repnik.quartz-retry</groupId>
     <artifactId>spring-quartz-retry</artifactId>
-    <version>version is available soon</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
