@@ -31,7 +31,7 @@ public class SampleService extends QuartzRetry<Payload, String> {
     
     @Override
     protected String process(Payload payload, RetryContext ctx) {
-        //If this method throws any kind of RuntimeException, the execution will be retried
+        //If this method throws any kind of Exception, the execution will be retried
         return mailService.send(payload);
     }
 
