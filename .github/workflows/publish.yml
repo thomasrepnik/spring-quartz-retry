@@ -20,7 +20,7 @@ jobs:
           java-version: 11
 
       - name: Wait for tests to succeed
-        uses: lewagon/wait-on-check-action@v1.1.1
+        uses: lewagon/wait-on-check-action@v1.3.3
         with:
           ref: ${{ github.ref }}
           check-name: 'Build'
