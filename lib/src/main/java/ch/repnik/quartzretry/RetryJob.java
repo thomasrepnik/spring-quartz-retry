@@ -35,22 +35,24 @@ class RetryJob implements Job {
 
         JobDataMap map = jobExecutionContext.getMergedJobDataMap();
         String className = map.get(DATA_MAP_CLASSNAME).toString();
+        String id = map.get(DATA_OBJECT_ID).toString();
         int retryCount = (int) map.get(DATA_MAP_RETRY_COUNT);
         byte[] payload = (byte[])map.get(DATA_MAP_PAYLOAD);
         byte[] serializedRetryContext = (byte[]) map.get(DATA_MAP_RETRY_CONTEXT);
 
-        Serializable deserialized = (Serializable) deserialize(payload);
-        RetryContext retryContext = (RetryContext) deserialize(serializedRetryContext);
+        Serializable deserialized = (Serializable) DeserializerUtil.deserialize(payload);
+        RetryContext retryContext = (RetryContext) DeserializerUtil.deserialize(serializedRetryContext);
 
 
-        try {
-            @SuppressWarnings("unchecked") QuartzRetry<Serializable, ?> bean = (QuartzRetry<Serializable, ?>) createBean(className);
-            bean.setRetryCount(++retryCount);
-            bean.execute(deserialized, retryContext);
-        } catch (Exception e) {
-            throw new QuartzRetryException("Could not create bean " + className, e);
-        }
+        @SuppressWarnings("unchecked") QuartzRetriable<?> bean = (QuartzRetriable<?>) createBean(className);
+        executeWithCapture(bean, id);
 
+    }
+
+    // Helper method to capture the wildcard
+    private <T> void executeWithCapture(QuartzRetriable<T> bean, String id) {
+        T payload = bean.selectById(id);
+        bean.execute(payload, id);
     }
 
     /**
@@ -75,21 +77,6 @@ class RetryJob implements Job {
      * @param in serialized byteArray
      * @return deserialized Object
      */
-    protected Object deserialize(final byte[] in) {
-        if (in == null){
-            return null;
-        }
 
-        Object o;
-        try (
-            ByteArrayInputStream bis = new ByteArrayInputStream(in);
-            ConfigurableObjectInputStream is = new ConfigurableObjectInputStream(bis, Thread.currentThread().getContextClassLoader())
-        ) {
-            o = is.readObject();
-        } catch (Exception e) {
-            throw new QuartzRetryException("Could not deserialize object from quartz jobDataMap", e);
-        }
-        return o;
-    }
 
 }

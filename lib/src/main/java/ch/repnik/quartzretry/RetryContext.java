@@ -10,7 +10,6 @@ import java.util.Map;
 public final class RetryContext implements Serializable {
 
     private int retryCount = 0;
-    private final Map<String, String> dataMap = new HashMap<>();
 
     /**
      * Gets the current retry count<br>
@@ -24,14 +23,6 @@ public final class RetryContext implements Serializable {
 
     void setRetryCount(int retryCount) {
         this.retryCount = retryCount;
-    }
-
-    /**
-     * Gets the current dataMap, for storing metadata across retries
-     * @return current dataMap
-     */
-    public Map<String, String> getDataMap(){
-        return dataMap;
     }
 
 }

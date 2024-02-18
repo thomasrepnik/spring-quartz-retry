@@ -1,45 +1,44 @@
 package ch.repnik.quartzretrysample.service;
 
-import ch.repnik.quartzretry.QuartzRetry;
+import ch.repnik.quartzretry.QuartzRetriable;
 import ch.repnik.quartzretry.RetryContext;
 import ch.repnik.quartzretry.RetryTimeout;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 
 import static ch.repnik.quartzretry.RetryTimeout.timeout;
-import static org.quartz.DateBuilder.IntervalUnit.*;
+import static org.quartz.DateBuilder.IntervalUnit.SECOND;
 
-@Service
-public class SampleService extends QuartzRetry<Payload, String> {
+@Component
+public class SampleService implements QuartzRetriable<Payload> {
+
+    /*@PostConstruct
+    public void init(){
+        System.out.println("Sample Service created");
+    }*/
 
     @Override
-    protected String process(Payload payload, RetryContext ctx) {
-        System.out.println(new Date() + ": " +
-                payload.getName() +
-                " sending payload to remote server (Current State: " +
-                payload.getState() +" " +
-                ctx.getRetryCount() +
-                ") " +
-                "Context: " + ctx.getDataMap());
-
-        switch(ctx.getRetryCount()){
-            case 0:
-                ctx.getDataMap().put("name", "Tim");
-                throw new IllegalArgumentException("Remote call failed");
-            case 1:
-                ctx.getDataMap().put("city", "Paris");
-                throw new IllegalArgumentException("Remote call failed");
-            case 2:
-                ctx.getDataMap().remove("city");
-                throw new IllegalArgumentException("Remote call failed");
-        }
-
-        return "Remote call successful exectued " + new Date() + " Context: " + ctx.getDataMap();
+    public void onSuccess(RetryContext context) {
+        System.out.println("success!!");
     }
 
     @Override
-    protected RetryTimeout[] getRetryTimeouts() {
+    public void onError(RetryContext context, Exception e) {
+        System.out.println("error!! " + context.getRetryCount());
+    }
+
+    @Override
+    public void onFailure(RetryContext context, Exception e) {
+        System.out.println("failure!! " + context.getRetryCount());
+    }
+
+    @Override
+    public RetryTimeout[] getRetryTimeouts() {
         return new RetryTimeout[] {
                 timeout(3, SECOND),
                 timeout(10, SECOND),
@@ -47,21 +46,26 @@ public class SampleService extends QuartzRetry<Payload, String> {
         };
     }
 
+    public void processAllEntities() {
+
+        for (int i = 0; i < 20; i++) {
+            Payload payload = new Payload();
+        }
+
+
+    }
+
+
     @Override
-    protected void onError(Payload entity, Exception e, RetryContext ctx) {
-        entity.setState(RetryState.RETRY);
+    public Payload selectById(String id) {
+        return null;
     }
 
     @Override
-    protected void onSuccess(Payload entity, String s, RetryContext ctx) {
-        entity.setState(RetryState.SUCCESS);
-        System.out.println(new Date() + ": " + entity.getName() + " SUCCESS: " + s);
+    public void execute(Payload payload, String id) {
+        System.out.println("hello from execute()");
+        throw new RuntimeException("oooops");
     }
 
-    @Override
-    protected void onFailure(Payload payload, Exception e, RetryContext ctx) {
-        System.out.println("All retries failed!");
-        e.printStackTrace();
-    }
 
 }
